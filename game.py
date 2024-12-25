@@ -2,87 +2,39 @@
 Markus Takkinen, rotsinen@proton.me
 """
 
-"Player class"
-
-class Player():
-    def __init__(self, name, score=0):
-        self.name = name
-        self.score = score
-
-    def change_score(self, points):
-        "Points can be negative"
-        self.score += points
-
-    def name(self):
-        return self.name
-
-    def score(self):
-        return self.score
-    
-    def __str__(self):
-        return f"{self.name} {self.score}point(s)"
-
-
-class Game():
-    def __init__(self):
-        self.player_amount = 0
-        self.players = []
-        self.round = 17
-        self.sum = 0
-
-
-    def player_max(self):
-        "Defining the number of players"
-        while True:
-            try:
-                number_of_players = int(input("Insert the number of players: "))
-                if(2<=number_of_players<=8):
-                    break
-                else:
-                    print("Insert a number between 2 and 8")
-            except:
-                print("Insert a valid number!")
-
-        self.player_amount = number_of_players
-
-
-    def add_player(self, player_number):
-        while True:
-            try:
-                player_name = str(input(f"Insert a name for player {player_number}: "))
-                return player_name
-            except:
-                print("Enter a valid player name!")
-
-    def init_players(self):
-        self.player_max()
-        for i in range(0,self.player_amount):
-            current_player_amount = len(self.players) + 1
-            player_name = self.add_player(current_player_amount)
-            player = Player(player_name)
-            self.players.append(player)
-
-    def players(self):
-        "return print(self.players[0].name)"
-        pass
-
-    def offers(self):
-        print(f"Maximum offer for this round is {self.round}")
-        for player in self.players:
-            if(player != self.players[-1]):
-                offer = make_offer(player.name, self.round, self.sum, False)
-                self.offer_sum_add(offer)
+def players_set_amount():
+    "Defining the number of players"
+    while True:
+        try:
+            number_of_players = int(input("Insert the number of players: "))
+            if(2<=number_of_players<=8):
+                return number_of_players
             else:
-                offer = make_offer(player.name, self.round, self.sum, True)
+                print("Insert a number between 2 and 8")
+        except:
+            print("Insert a valid number!")
 
 
-    def make_offer(self, player_name, max_offer, offer_sum, last_player):
-        while True:
-            try:
-                offer_amount = int(input(f"Enter {player_name}'s offer for this round: "))
-            except:
-                print(f"Enter a valid offer!")
-    
+def player_add(player_number):
+    while True:
+        try:
+            player_name = str(input(f"Insert a name for player {player_number}: "))
+            if (len(player_name) > 2):
+                return player_name
+            print("Playername must be longer than 2 letters.")
+
+        except:
+            print("Enter a valid player name!")
+
+
+def offer_make(player_name, max_offer, offer_sum, last_player):
+    while True:
+        try:
+            offer_amount = int(input(f"Enter {player_name}'s offer for this round: "))
+        except:
+            print(f"Enter a valid offer!")
+
+        try:
             if(not (0 <= offer_amount <= max_offer)):
                 print(f"Offer must be between 0 and {max_offer}!")
                 continue
@@ -92,19 +44,106 @@ class Game():
                 return offer_amount
             print(f"Last offer cannot be {max_offer - offer_sum}!")
 
+        except:
+            print("Aswer cannot be 'enter'!")
+
+def win_or_lose(player):
+    while True:
+        try:
+            win_cond = input(f"Did player {player.name} win? (y/n) \n")
+            if (win_cond not in ("y", "n")):
+                print("Enter a valid answer!")
+            elif (win_cond == "y"):
+                return True
+            elif (win_cond == "n"):
+                return False
+        except:
+                print("Answer is not valid!")
+
+
+
+"Player class"
+class Player():
+    def __init__(self, name, score=0, offer=0):
+        self.name = name
+        self.score = score
+        self.offer = offer
+
+    def score_change(self, win=True):
+        if win:
+            self.score += self.offer + 10
+        else:
+            self.score -= self.offer
+
+    def offer_reset(self):
+        self.offer = 0
+
+    def offer_set(self, value):
+        self.offer = value
+
+    def name(self):
+        return self.name
+
+    def score(self):
+        return self.score
+
+    def offer(self):
+        return self.offer
     
-    def results(self):
-        pass
+    def __str__(self):
+        return f"{self.name} {self.score}point(s)"
+
+"Game class"
+
+class Game():
+    def __init__(self):
+        self.player_amount = 0
+        self.players = []
+        self.round = 17
+        self.sum = 0
+
+
+    def players_init(self):
+        self.player_amount = players_set_amount()
+        for i in range(0,self.player_amount):
+            current_player_number = len(self.players) + 1
+            player_name = player_add(current_player_number)
+            player = Player(player_name)
+            self.players.append(player)
 
     def offer_round(self):
-        pass
+        print(f"Maximum offer for this round is {self.round}")
+        for player in self.players:
+            if(player != self.players[-1]):
+                offer = offer_make(player.name, self.round, self.sum, False)
+                self.offer_sum_add(offer)
+            else:
+                offer = offer_make(player.name, self.round, self.sum, True)
 
-    def card_counter(self):
-        return self.round
+            player.offer_set(offer)
+
+    def results(self):
+        for player in self.players:
+            win_cond = win_or_lose(player)
+            player.score_change(win_cond)
+            player.offer_reset()
+
+            print(f"{player.name} has now {player.score} point(s)!")
+
 
     def round_finish(self):
         self.round -= 1
         self.sum = 0
+
+   
+    def round_game(self):
+        self.offer_round()
+        self.results()
+        self.round_finish()
+
+
+    def card_counter(self):
+        return self.round
 
     def offer_sum(self):
         return self.sum
@@ -112,14 +151,13 @@ class Game():
     def offer_sum_add(self, amount):
         self.sum += amount
         
-    def game_loop(self):
+    def game(self):
+        self.players_init()
         while (self.round > 0):
-            self.offer_round()
+            self.round_game()
 
  
 game = Game()
-game.init_players()
-game.game_loop()
-
+game.game()
 
 
