@@ -47,18 +47,36 @@ def offer_make(player_name, max_offer, offer_sum, last_player):
         except:
             print("Aswer cannot be 'enter'!")
 
-def win_or_lose(player):
+def win_or_lose(player, could_last_win=True):
     while True:
         try:
             win_cond = input(f"Did player {player.name} win? (y/n) \n")
             if (win_cond not in ("y", "n")):
                 print("Enter a valid answer!")
-            elif (win_cond == "y"):
-                return True
             elif (win_cond == "n"):
                 return False
+            elif (win_cond == "y" and could_last_win):
+                return True
         except:
-                print("Answer is not valid!")
+            print("Answer is not valid!")
+
+def score_change(players):
+    last_could_win = False
+    for player in players:
+        if(player != players[-1]):
+            winner = win_or_lose(player)
+            if (winner == False):
+                last_could_win = True
+        elif(last_could_win == True):
+            winner = win_or_lose(player)
+        else:
+            winner = False
+        print(last_could_win)
+        player.score_change(winner)
+        player.offer_reset()
+        print(f"{player.name} has now {player.score} point(s)!")
+    last_could_win = False
+
 
 
 
@@ -123,13 +141,7 @@ class Game():
             player.offer_set(offer)
 
     def results(self):
-        for player in self.players:
-            win_cond = win_or_lose(player)
-            player.score_change(win_cond)
-            player.offer_reset()
-
-            print(f"{player.name} has now {player.score} point(s)!")
-
+        score_change(self.players)
 
     def round_finish(self):
         self.round -= 1
