@@ -50,7 +50,7 @@ def offer_make(player_name, max_offer, offer_sum, last_player):
 def win_or_lose(player, could_last_win=True):
     while True:
         try:
-            win_cond = input(f"Did player {player.name} win? (y/n) \n")
+            win_cond = input(f"Did player {player.name} win? (y/n): ")
             if (win_cond not in ("y", "n")):
                 print("Enter a valid answer!")
             elif (win_cond == "n"):
@@ -62,6 +62,7 @@ def win_or_lose(player, could_last_win=True):
 
 def score_change(players):
     last_could_win = False
+    print("\nRound is finished!")
     for player in players:
         if(player != players[-1]):
             winner = win_or_lose(player)
@@ -71,7 +72,6 @@ def score_change(players):
             winner = win_or_lose(player)
         else:
             winner = False
-        print(last_could_win)
         player.score_change(winner)
         player.offer_reset()
         print(f"{player.name} has now {player.score} point(s)!")
@@ -130,7 +130,7 @@ class Game():
             self.players.append(player)
 
     def offer_round(self):
-        print(f"Maximum offer for this round is {self.round}")
+        print(f"\nMaximum offer for this round is {self.round}")
         for player in self.players:
             if(player != self.players[-1]):
                 offer = offer_make(player.name, self.round, self.sum, False)
@@ -152,7 +152,13 @@ class Game():
         self.offer_round()
         self.results()
         self.round_finish()
+        self.players.append(self.players[0])
+        self.players.pop(0)
 
+    def game(self):
+        self.players_init()
+        while (self.round > 0):
+            self.round_game()
 
     def card_counter(self):
         return self.round
@@ -163,11 +169,6 @@ class Game():
     def offer_sum_add(self, amount):
         self.sum += amount
         
-    def game(self):
-        self.players_init()
-        while (self.round > 0):
-            self.round_game()
-
  
 game = Game()
 game.game()
