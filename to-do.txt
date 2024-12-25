@@ -1,0 +1,8 @@
+Define the number of players.
+Initialize the score counter to players.
+Program the round.
+Make the offers.
+Add/substract the points from all players.
+
+
+
